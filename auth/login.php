@@ -1,5 +1,5 @@
 <?php
-include 'config/conn.php';
+include '../config/conn.php';
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
