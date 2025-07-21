@@ -15,9 +15,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION["user_email"] = $row["email"];
             // Redirect admin to dashboard, others to User/index.html
             if ($row["email"] === "admin@ecommerce.com") {
-                header("Location: admin/dashboard.php");
+                header("Location: ../admin/dashboard.php");
             } else {
-                header("Location: User/index.php");
+                header("Location: ../User/index.php");
             }
             exit();
         } else {

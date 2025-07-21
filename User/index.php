@@ -4,6 +4,7 @@ if (!isset($_SESSION["user_id"])) {
     header("Location: ../auth/login.php");
     exit();
 }
+include '../config/conn.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -151,166 +152,37 @@ if (!isset($_SESSION["user_id"])) {
         <div class="container">
             <h2 class="section-title">Featured Shoes</h2>
             <div class="products-grid">
-                <!-- Product 1 -->
-                <div class="product-card">
-                    <div class="product-badge">New</div>
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1543508282-6319a3e2621f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-                            alt="Running Shoes" />
-                        <div class="product-actions">
-                            <div class="action-btn"><i class="fas fa-heart"></i></div>
-                            <div class="action-btn"><i class="fas fa-eye"></i></div>
-                            <div
-                                class="action-btn add-to-cart"
-                                data-id="1"
-                                data-name="UltraBoost Runners"
-                                data-price="129.99">
-                                <i class="fas fa-shopping-cart"></i>
+                <?php
+                $featured = $conn->query("SELECT * FROM products WHERE status='featured' LIMIT 4");
+                while ($product = $featured->fetch_assoc()):
+                ?>
+                    <div class="product-card">
+                        <div class="product-badge">Featured</div>
+                        <div class="product-image">
+                            <img src="<?= htmlspecialchars($product['image_url']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" />
+                            <div class="product-actions">
+                                <div class="action-btn"><i class="fas fa-heart"></i></div>
+                                <div class="action-btn"><i class="fas fa-eye"></i></div>
+                                <div class="action-btn add-to-cart"
+                                    data-id="<?= $product['id'] ?>"
+                                    data-name="<?= htmlspecialchars($product['name']) ?>"
+                                    data-price="<?= $product['price'] ?>">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">UltraBoost Runners</h3>
-                        <div class="product-price">
-                            <span class="current-price">$129.99</span>
-                            <span class="original-price">$149.99</span>
-                        </div>
-                        <p>Lightweight running shoes with maximum cushioning</p>
-                        <div class="product-meta">
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                (142)
+                        <div class="product-info">
+                            <h3 class="product-title"><?= htmlspecialchars($product['name']) ?></h3>
+                            <div class="product-price">
+                                <span class="current-price">$<?= number_format($product['price'], 2) ?></span>
+                                <?php if ($product['sale_price']): ?>
+                                    <span class="original-price">$<?= number_format($product['sale_price'], 2) ?></span>
+                                <?php endif; ?>
                             </div>
-                            <div>In stock</div>
+                            <p><?= htmlspecialchars($product['description']) ?></p>
                         </div>
                     </div>
-                </div>
-
-                <!-- Product 2 -->
-                <div class="product-card">
-                    <div class="product-badge">Sale</div>
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-                            alt="Casual Shoes" />
-                        <div class="product-actions">
-                            <div class="action-btn"><i class="fas fa-heart"></i></div>
-                            <div class="action-btn"><i class="fas fa-eye"></i></div>
-                            <div
-                                class="action-btn add-to-cart"
-                                data-id="2"
-                                data-name="Urban Classic Sneakers"
-                                data-price="89.99">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">Urban Classic Sneakers</h3>
-                        <div class="product-price">
-                            <span class="current-price">$89.99</span>
-                            <span class="original-price">$109.99</span>
-                        </div>
-                        <p>Classic design meets modern comfort</p>
-                        <div class="product-meta">
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                (98)
-                            </div>
-                            <div>In stock</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product 3 -->
-                <div class="product-card">
-                    <div class="product-badge">Best Seller</div>
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1600269452121-4f2416e55c28?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-                            alt="Hiking Boots" />
-                        <div class="product-actions">
-                            <div class="action-btn"><i class="fas fa-heart"></i></div>
-                            <div class="action-btn"><i class="fas fa-eye"></i></div>
-                            <div
-                                class="action-btn add-to-cart"
-                                data-id="3"
-                                data-name="TrailMaster Hiking Boots"
-                                data-price="149.99">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">TrailMaster Hiking Boots</h3>
-                        <div class="product-price">
-                            <span class="current-price">$149.99</span>
-                        </div>
-                        <p>Waterproof and durable for all terrains</p>
-                        <div class="product-meta">
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                (76)
-                            </div>
-                            <div>In stock</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product 4 -->
-                <div class="product-card">
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1560343090-f0409e92791a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
-                            alt="Formal Shoes" />
-                        <div class="product-actions">
-                            <div class="action-btn"><i class="fas fa-heart"></i></div>
-                            <div class="action-btn"><i class="fas fa-eye"></i></div>
-                            <div
-                                class="action-btn add-to-cart"
-                                data-id="4"
-                                data-name="Executive Oxfords"
-                                data-price="119.99">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">Executive Oxfords</h3>
-                        <div class="product-price">
-                            <span class="current-price">$119.99</span>
-                        </div>
-                        <p>Premium leather for business occasions</p>
-                        <div class="product-meta">
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <i class="far fa-star"></i>
-                                (53)
-                            </div>
-                            <div>In stock</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div style="text-align: center; margin-top: 30px">
-                <a href="#" class="btn btn-secondary">View All Products</a>
+                <?php endwhile; ?>
             </div>
         </div>
     </section>
@@ -320,185 +192,76 @@ if (!isset($_SESSION["user_id"])) {
         <div class="container">
             <h2 class="section-title">Collections</h2>
             <div class="products-grid">
-                <div class="product-card">
-                    <div class="product-badge">Limited</div>
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=500&q=80"
-                            alt="Retro High-Tops" />
-                        <div class="product-actions">
-                            <div class="action-btn"><i class="fas fa-heart"></i></div>
-                            <div class="action-btn"><i class="fas fa-eye"></i></div>
-                            <div
-                                class="action-btn add-to-cart"
-                                data-id="5"
-                                data-name="Retro High-Tops"
-                                data-price="139.99">
-                                <i class="fas fa-shopping-cart"></i>
+                <?php
+                $collections = $conn->query("SELECT * FROM products WHERE status='collection' LIMIT 4");
+                while ($product = $collections->fetch_assoc()):
+                ?>
+                    <div class="product-card">
+                        <div class="product-badge">Limited</div>
+                        <div class="product-image">
+                            <img
+                                src="https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=500&q=80"
+                                alt="Retro High-Tops" />
+                            <div class="product-actions">
+                                <div class="action-btn"><i class="fas fa-heart"></i></div>
+                                <div class="action-btn"><i class="fas fa-eye"></i></div>
+                                <div
+                                    class="action-btn add-to-cart"
+                                    data-id="5"
+                                    data-name="Retro High-Tops"
+                                    data-price="139.99">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">Retro High-Tops</h3>
+                            <div class="product-price">
+                                <span class="current-price">$139.99</span>
+                            </div>
+                            <p>Classic style with modern comfort</p>
+                            <div class="product-meta">
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <i class="far fa-star"></i>
+                                    (34)
+                                </div>
+                                <div>Limited stock</div>
                             </div>
                         </div>
                     </div>
-                    <div class="product-info">
-                        <h3 class="product-title">Retro High-Tops</h3>
-                        <div class="product-price">
-                            <span class="current-price">$139.99</span>
-                        </div>
-                        <p>Classic style with modern comfort</p>
-                        <div class="product-meta">
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <i class="far fa-star"></i>
-                                (34)
-                            </div>
-                            <div>Limited stock</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-badge">Exclusive</div>
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=500&q=80"
-                            alt="Designer Loafers" />
-                        <div class="product-actions">
-                            <div class="action-btn"><i class="fas fa-heart"></i></div>
-                            <div class="action-btn"><i class="fas fa-eye"></i></div>
-                            <div
-                                class="action-btn add-to-cart"
-                                data-id="6"
-                                data-name="Designer Loafers"
-                                data-price="159.99">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">Designer Loafers</h3>
-                        <div class="product-price">
-                            <span class="current-price">$159.99</span>
-                        </div>
-                        <p>Handcrafted luxury for every occasion</p>
-                        <div class="product-meta">
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                (21)
-                            </div>
-                            <div>Exclusive</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-badge">Trending</div>
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=500&q=80"
-                            alt="Street Sneakers" />
-                        <div class="product-actions">
-                            <div class="action-btn"><i class="fas fa-heart"></i></div>
-                            <div class="action-btn"><i class="fas fa-eye"></i></div>
-                            <div
-                                class="action-btn add-to-cart"
-                                data-id="7"
-                                data-name="Street Sneakers"
-                                data-price="99.99">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">Street Sneakers</h3>
-                        <div class="product-price">
-                            <span class="current-price">$99.99</span>
-                        </div>
-                        <p>Urban look for everyday wear</p>
-                        <div class="product-meta">
-                            <div class="rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                (56)
-                            </div>
-                            <div>Trending</div>
-                        </div>
-                    </div>
-                </div>
+                <?php endwhile; ?>
             </div>
         </div>
     </section>
 
-    <!-- New Arrivals Section -->
+    <!-- New Arrivals -->
     <section class="new-arrivals" id="new-arrivals">
         <div class="container">
             <h2 class="section-title">New Arrivals</h2>
             <div class="arrivals-grid">
-                <div class="product-card">
-                    <div class="product-badge">New</div>
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=500&q=80"
-                            alt="Summer Sandals" />
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">Summer Breeze Sandals</h3>
-                        <div class="product-price">
-                            <span class="current-price">$79.99</span>
+                <?php
+                $new_arrivals = $conn->query("SELECT * FROM products WHERE status='new_arrival' LIMIT 4");
+                while ($product = $new_arrivals->fetch_assoc()):
+                ?>
+                    <div class="product-card">
+                        <div class="product-badge">New</div>
+                        <div class="product-image">
+                            <img
+                                src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=500&q=80"
+                                alt="Summer Sandals" />
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">Summer Breeze Sandals</h3>
+                            <div class="product-price">
+                                <span class="current-price">$79.99</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="product-badge">New</div>
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1607522370275-f14206abe5d3?auto=format&fit=crop&w=500&q=80"
-                            alt="Slip-On Sneakers" />
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">Comfort Slip-Ons</h3>
-                        <div class="product-price">
-                            <span class="current-price">$94.99</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="product-badge">New</div>
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=500&q=80"
-                            alt="Basketball Shoes" />
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">Pro Court Basketball</h3>
-                        <div class="product-price">
-                            <span class="current-price">$134.99</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="product-badge">New</div>
-                    <div class="product-image">
-                        <img
-                            src="https://images.unsplash.com/photo-1560343090-f0409e92791a?auto=format&fit=crop&w=500&q=80"
-                            alt="Formal Loafers" />
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">Leather Comfort Loafers</h3>
-                        <div class="product-price">
-                            <span class="current-price">$109.99</span>
-                        </div>
-                    </div>
-                </div>
+                <?php endwhile; ?>
             </div>
         </div>
     </section>
@@ -754,15 +517,18 @@ if (!isset($_SESSION["user_id"])) {
                         placeholder="Shipping Address"
                         required
                         style="margin-bottom: 10px; width: 100%; padding: 10px"></textarea>
+                    required
+                    style="margin-bottom: 10px; width: 100%; padding: 10px"></textarea>eckout
                 </div>
                 <button type="submit" class="btn btn-secondary" style="width: 100%">
                     Checkout
                 </button>
             </form>
-        </div>
+        </div>t src="../assets/js/main.js"></script>
     </div>
+</body>
 
-    <script src="../assets/js/main.js"></script>
+<script src="../assets/js/main.js"></script>
 </body>
 
 </html>

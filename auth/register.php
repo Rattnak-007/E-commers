@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION["user_id"] = $user_id;
         $_SESSION["user_name"] = $name;
         $_SESSION["user_email"] = $email;
-        header("Location: User/index.php");
+        header("Location: ../User/index.php");
         exit();
     } else {
         $error = "Registration failed: " . $conn->error;
