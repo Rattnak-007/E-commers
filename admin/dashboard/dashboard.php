@@ -8,9 +8,9 @@ include '../../config/conn.php';
 
 // Fetch statistics
 $totalProducts = $conn->query("SELECT COUNT(*) as count FROM products")->fetch_assoc()['count'];
-$totalUsers = $conn->query("SELECT COUNT(*) as count FROM users WHERE email != 'admin@ecommerce.com'")->fetch_assoc()['count'];
 $featuredProducts = $conn->query("SELECT COUNT(*) as count FROM products WHERE status = 'featured'")->fetch_assoc()['count'];
 $newArrivals = $conn->query("SELECT COUNT(*) as count FROM products WHERE status = 'new_arrival'")->fetch_assoc()['count'];
+$collections = $conn->query("SELECT COUNT(*) as count FROM products WHERE status = 'collection'")->fetch_assoc()['count'];
 ?>
 
 <!DOCTYPE html>
@@ -33,7 +33,7 @@ $newArrivals = $conn->query("SELECT COUNT(*) as count FROM products WHERE status
                 <h1>Dashboard</h1>
                 <div class="admin-info">
                     <span>Welcome, Admin</span>
-                    <img src="https://via.placeholder.com/40" alt="Admin" class="admin-avatar">
+                    <img src="" alt="Admin" class="admin-avatar">
                 </div>
             </header>
 
@@ -46,16 +46,6 @@ $newArrivals = $conn->query("SELECT COUNT(*) as count FROM products WHERE status
                     <div class="stat-details">
                         <h3>Total Products</h3>
                         <p><?= $totalProducts ?></p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: #2196F3;">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-details">
-                        <h3>Total Users</h3>
-                        <p><?= $totalUsers ?></p>
                     </div>
                 </div>
 
@@ -76,6 +66,15 @@ $newArrivals = $conn->query("SELECT COUNT(*) as count FROM products WHERE status
                     <div class="stat-details">
                         <h3>New Arrivals</h3>
                         <p><?= $newArrivals ?></p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e91ec0ff;">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>Collections</h3>
+                        <p><?= $collections ?></p>
                     </div>
                 </div>
             </div>

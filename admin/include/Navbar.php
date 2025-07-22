@@ -29,7 +29,7 @@
                 <a href="../orders/orders.php" <?= basename($_SERVER['PHP_SELF']) == 'orders.php' ? 'class="active"' : '' ?>>
                     <i class="fas fa-shopping-cart"></i> Orders
                 </a>
-                <a href="users.php" <?= basename($_SERVER['PHP_SELF']) == 'users.php' ? 'class="active"' : '' ?>>
+                <a href="../Total_user/User.php" <?= basename($_SERVER['PHP_SELF']) == 'User.php' ? 'class="active"' : '' ?>>
                     <i class="fas fa-users"></i> Users
                 </a>
                 <a href="../auth/logout.php">
