@@ -87,22 +87,47 @@ $newArrivals = $conn->query("SELECT COUNT(*) as count FROM products WHERE status
                     <table>
                         <thead>
                             <tr>
+                                <th>Image</th>
                                 <th>Product Name</th>
+                                <th>Category</th>
                                 <th>Price</th>
+                                <th>Sale Price</th>
                                 <th>Status</th>
                                 <th>Stock</th>
+                                <th>Added Date</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
-                            $recentProducts = $conn->query("SELECT * FROM products ORDER BY created_at DESC LIMIT 5");
+                            $recentProducts = $conn->query("
+                                SELECT p.*, c.name as category_name 
+                                FROM products p
+                                LEFT JOIN categories c ON p.category_id = c.id
+                                ORDER BY p.created_at DESC 
+                                LIMIT 5
+                            ");
                             while ($product = $recentProducts->fetch_assoc()):
+                                $status_class = strtolower($product['status']);
                             ?>
                                 <tr>
+                                    <td>
+                                        <?php if (!empty($product['image_url'])): ?>
+                                            <img src="../../admin/uploads/<?= htmlspecialchars($product['image_url']) ?>"
+                                                alt="<?= htmlspecialchars($product['name']) ?>"
+                                                style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                        <?php else: ?>
+                                            <div style="width: 50px; height: 50px; background: #eee; border-radius: 5px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-image" style="color: #aaa;"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?= htmlspecialchars($product['name']) ?></td>
+                                    <td><?= htmlspecialchars($product['category_name']) ?></td>
                                     <td>$<?= number_format($product['price'], 2) ?></td>
-                                    <td><span class="status-badge <?= $product['status'] ?>"><?= ucfirst($product['status']) ?></span></td>
+                                    <td><?= $product['sale_price'] ? '$' . number_format($product['sale_price'], 2) : '-' ?></td>
+                                    <td><span class="status-badge <?= $status_class ?>"><?= ucfirst($product['status']) ?></span></td>
                                     <td><?= $product['stock'] ?></td>
+                                    <td><?= date('M d, Y', strtotime($product['created_at'])) ?></td>
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
