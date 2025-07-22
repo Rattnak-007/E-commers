@@ -159,7 +159,8 @@ include '../config/conn.php';
                     <div class="product-card">
                         <div class="product-badge">Featured</div>
                         <div class="product-image">
-                            <img src="<?= htmlspecialchars($product['image_url']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" />
+                            <img src="<?= !empty($product['image_url']) ? '../admin/uploads/' . $product['image_url'] : '../assets/images/default-product.jpg' ?>"
+                                alt="<?= htmlspecialchars($product['name']) ?>" />
                             <div class="product-actions">
                                 <div class="action-btn"><i class="fas fa-heart"></i></div>
                                 <div class="action-btn"><i class="fas fa-eye"></i></div>
@@ -199,27 +200,25 @@ include '../config/conn.php';
                     <div class="product-card">
                         <div class="product-badge">Limited</div>
                         <div class="product-image">
-                            <img
-                                src="https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=500&q=80"
-                                alt="Retro High-Tops" />
+                            <img src="<?= !empty($product['image_url']) ? '../admin/uploads/' . $product['image_url'] : '../assets/images/default-product.jpg' ?>"
+                                alt="<?= htmlspecialchars($product['name']) ?>" />
                             <div class="product-actions">
                                 <div class="action-btn"><i class="fas fa-heart"></i></div>
                                 <div class="action-btn"><i class="fas fa-eye"></i></div>
-                                <div
-                                    class="action-btn add-to-cart"
-                                    data-id="5"
-                                    data-name="Retro High-Tops"
-                                    data-price="139.99">
+                                <div class="action-btn add-to-cart"
+                                    data-id="<?= $product['id'] ?>"
+                                    data-name="<?= htmlspecialchars($product['name']) ?>"
+                                    data-price="<?= $product['price'] ?>">
                                     <i class="fas fa-shopping-cart"></i>
                                 </div>
                             </div>
                         </div>
                         <div class="product-info">
-                            <h3 class="product-title">Retro High-Tops</h3>
+                            <h3 class="product-title"><?= htmlspecialchars($product['name']) ?></h3>
                             <div class="product-price">
-                                <span class="current-price">$139.99</span>
+                                <span class="current-price">$<?= number_format($product['price'], 2) ?></span>
                             </div>
-                            <p>Classic style with modern comfort</p>
+                            <p><?= htmlspecialchars($product['description']) ?></p>
                             <div class="product-meta">
                                 <div class="rating">
                                     <i class="fas fa-star"></i>
@@ -227,7 +226,7 @@ include '../config/conn.php';
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star-half-alt"></i>
                                     <i class="far fa-star"></i>
-                                    (34)
+                                    (<?= rand(10, 50) ?>)
                                 </div>
                                 <div>Limited stock</div>
                             </div>
@@ -250,9 +249,8 @@ include '../config/conn.php';
                     <div class="product-card">
                         <div class="product-badge">New</div>
                         <div class="product-image">
-                            <img
-                                src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=500&q=80"
-                                alt="Summer Sandals" />
+                            <img src="<?= !empty($product['image_url']) ? '../admin/uploads/' . $product['image_url'] : '../assets/images/default-product.jpg' ?>"
+                                alt="<?= htmlspecialchars($product['name']) ?>" />
                         </div>
                         <div class="product-info">
                             <h3 class="product-title">Summer Breeze Sandals</h3>
@@ -474,10 +472,9 @@ include '../config/conn.php';
                     </ul>
                 </div>
             </div>
-
-            <div class="copyright">
-                <p>&copy; 2023 StepStyle. All rights reserved.</p>
-            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2023 StepStyle. All rights reserved.</p>
         </div>
     </footer>
 
@@ -517,22 +514,14 @@ include '../config/conn.php';
                         placeholder="Shipping Address"
                         required
                         style="margin-bottom: 10px; width: 100%; padding: 10px"></textarea>
-                    required
-                    style="margin-bottom: 10px; width: 100%; padding: 10px"></textarea>eckout
                 </div>
                 <button type="submit" class="btn btn-secondary" style="width: 100%">
                     Checkout
                 </button>
             </form>
-        </div>t src="../assets/js/main.js"></script>
+        </div>
     </div>
+    <script src="../assets/js/main.js"></script>
 </body>
-
-<script src="../assets/js/main.js"></script>
-</body>
-
-</html>
-
-</html>
 
 </html>

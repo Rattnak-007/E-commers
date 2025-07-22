@@ -4,7 +4,7 @@ if (!isset($_SESSION["user_email"]) || $_SESSION["user_email"] !== "admin@ecomme
     header("Location: ../auth/login.php");
     exit();
 }
-include '../config/conn.php';
+include '../../config/conn.php';
 
 // Fetch statistics
 $totalProducts = $conn->query("SELECT COUNT(*) as count FROM products")->fetch_assoc()['count'];
@@ -26,34 +26,7 @@ $newArrivals = $conn->query("SELECT COUNT(*) as count FROM products WHERE status
 
 <body>
     <div class="admin-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo">
-                <i class="fas fa-shoe-prints"></i>
-                <span>StepStyle Admin</span>
-            </div>
-            <nav>
-                <a href="dashboard.php" class="active">
-                    <i class="fas fa-home"></i> Dashboard
-                </a>
-                <a href="products.php">
-                    <i class="fas fa-box"></i> Products
-                </a>
-                <a href="categories.php">
-                    <i class="fas fa-tags"></i> Categories
-                </a>
-                <a href="orders.php">
-                    <i class="fas fa-shopping-cart"></i> Orders
-                </a>
-                <a href="users.php">
-                    <i class="fas fa-users"></i> Users
-                </a>
-                <a href="../auth/logout.php">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </nav>
-        </div>
-
+        <?php require '../include/Navbar.php'; ?>
         <!-- Main Content -->
         <div class="main-content">
             <header>
@@ -138,7 +111,6 @@ $newArrivals = $conn->query("SELECT COUNT(*) as count FROM products WHERE status
             </div>
         </div>
     </div>
-
     <script src="assets/js/admin.js"></script>
 </body>
 
