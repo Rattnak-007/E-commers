@@ -186,7 +186,6 @@ $users = $conn->query("
                     <tr>
                         <th>Email</th>
                         <th>Registration Date</th>
-                        <th>Total Orders</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -196,7 +195,6 @@ $users = $conn->query("
                         <tr>
                             <td class="user-email"><?php echo htmlspecialchars($user['email']); ?></td>
                             <td class="user-date"><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
-                            <td class="total-orders"><?php echo $user['total_orders']; ?> orders</td>
                             <td><span class="user-status status-active">Active</span></td>
                             <td>
                                 <button class="btn-delete"

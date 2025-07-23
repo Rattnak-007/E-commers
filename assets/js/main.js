@@ -208,6 +208,35 @@ cartIcon.addEventListener("click", function () {
   cartModal.classList.add("show");
 });
 
+// Fix: open cart modal when clicking the cart icon or its children
+["click", "touchstart"].forEach((evtType) => {
+  cartIcon.addEventListener(evtType, function (e) {
+    // Prevent default and stop propagation
+    e.preventDefault();
+    e.stopPropagation();
+    renderCart();
+
+    let totalQty = 0;
+    let total = 0;
+    cartItems.forEach((item) => {
+      totalQty += item.qty;
+      total += item.price * item.qty;
+    });
+
+    toastMessage.textContent =
+      cartItems.length > 0
+        ? `You have ${totalQty} item${
+            totalQty > 1 ? "s" : ""
+          } in your cart. Total: $${total.toFixed(2)}`
+        : "Your cart is empty.";
+
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3000);
+
+    cartModal.classList.add("show");
+  });
+});
+
 // Quantity + Remove
 cartItemsContainer.addEventListener("click", function (e) {
   const idx = e.target.getAttribute("data-idx");

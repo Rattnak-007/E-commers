@@ -6,21 +6,35 @@ if (!isset($_SESSION["user_id"])) {
 }
 include '../config/conn.php';
 
+// Initialize messages
+$success_message = '';
+$error_message = '';
+
+// Show success message if redirected after order
+if (isset($_GET['order']) && $_GET['order'] === 'success') {
+    $success_message = "Order placed successfully!";
+}
+
 // Handle checkout form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_submit'])) {
     $user_id = $_SESSION['user_id'];
     $name = trim($_POST['checkoutName']);
     $email = trim($_POST['checkoutEmail']);
     $address = trim($_POST['checkoutAddress']);
-    $cart = isset($_POST['cart_data']) ? json_decode($_POST['cart_data'], true) : [];
+    $cart_json = isset($_POST['cart_data']) ? $_POST['cart_data'] : '';
+    $cart = [];
     $total = 0;
-    $error_message = '';
 
     // Validate fields
     if (!$name || !$email || !$address) {
         $error_message = "Please fill in all checkout fields.";
-    } elseif (empty($cart)) {
+    } elseif (empty($cart_json)) {
         $error_message = "Your cart is empty.";
+    } else {
+        $cart = json_decode($cart_json, true);
+        if (!is_array($cart) || count($cart) == 0) {
+            $error_message = "Your cart is empty.";
+        }
     }
 
     if (!$error_message) {
@@ -49,7 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_submit'])) {
                         }
                     }
                     if (!$error_message) {
-                        $success_message = "Order placed successfully!";
+                        // Redirect to avoid resubmission
+                        header("Location: index.php?order=success");
+                        exit();
                     }
                 } else {
                     $error_message = "Failed to prepare order items statement: " . $conn->error;
@@ -598,10 +614,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_submit'])) {
             <?php if (!empty($error_message)): ?>
                 <div style="color:red; margin-bottom:10px;"><?= htmlspecialchars($error_message) ?></div>
             <?php endif; ?>
+
             <!-- Cart Info Summary -->
-            <div id="cartInfoSummary" style="margin-bottom: 16px; font-size: 16px; color: #333;">
-                <!-- JS will fill this with cart details -->
-            </div>
+            <div id="cartInfoSummary" style="margin-bottom: 16px; font-size: 16px; color: #333;"></div>
+
             <!-- Order Items Table -->
             <div id="cartItemsTableWrapper">
                 <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
@@ -611,6 +627,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_submit'])) {
                 </table>
             </div>
             <div id="cartSummary" style="margin-bottom: 20px"></div>
+
             <!-- Order Details Preview (hidden, but needed for JS) -->
             <div style="display:none;">
                 <span id="orderDetailName"></span>
@@ -619,6 +636,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_submit'])) {
                 <span id="orderDetailTotalItems"></span>
                 <span id="orderDetailTotalPrice"></span>
             </div>
+
+            <!-- Checkout Form -->
             <form id="cartForm" method="POST" autocomplete="off">
                 <div class="form-group">
                     <input type="text" name="checkoutNameVisible" id="checkoutNameVisible" placeholder="Full Name" required />
@@ -629,19 +648,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_submit'])) {
                 <div class="form-group">
                     <textarea name="checkoutAddressVisible" id="checkoutAddressVisible" placeholder="Shipping Address" required></textarea>
                 </div>
-                <!-- Hidden fields for PHP submission (no required attribute) -->
+                <!-- Hidden fields for PHP submission -->
                 <input type="hidden" name="checkoutName" id="checkoutName" />
                 <input type="hidden" name="checkoutEmail" id="checkoutEmail" />
                 <input type="hidden" name="checkoutAddress" id="checkoutAddress" />
                 <input type="hidden" name="cart_data" id="cartDataInput" />
                 <input type="hidden" name="checkout_submit" value="1" />
-                <button type="submit" class="btn btn-secondary" style="width: 100%">
-                    Checkout
-                </button>
+                <button type="submit" class="btn btn-secondary" style="width: 100%">Checkout</button>
             </form>
         </div>
     </div>
+    <!-- Main JS -->
     <script src="../assets/js/main.js"></script>
+    <?php
+    // Only show cart modal automatically if there is an error or just placed an order
+    $showCartModal = (!empty($error_message) || (isset($_GET['order']) && $_GET['order'] === 'success'));
+    if ($showCartModal):
+    ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                document.getElementById("cartModal").classList.add("show");
+            });
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>
