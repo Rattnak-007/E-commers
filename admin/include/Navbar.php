@@ -26,7 +26,7 @@
                 <a href="../categories/categories.php" <?= basename($_SERVER['PHP_SELF']) == 'categories.php' ? 'class="active"' : '' ?>>
                     <i class="fas fa-tags"></i> Categories
                 </a>
-                <a href="../orders/orders.php" <?= basename($_SERVER['PHP_SELF']) == 'orders.php' ? 'class="active"' : '' ?>>
+                <a href="../orders/manage_order.php" <?= basename($_SERVER['PHP_SELF']) == 'manage_order.php' ? 'class="active"' : '' ?>>
                     <i class="fas fa-shopping-cart"></i> Orders
                 </a>
                 <a href="../Total_user/User.php" <?= basename($_SERVER['PHP_SELF']) == 'User.php' ? 'class="active"' : '' ?>>

@@ -5,6 +5,63 @@ if (!isset($_SESSION["user_id"])) {
     exit();
 }
 include '../config/conn.php';
+
+// Handle checkout form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_submit'])) {
+    $user_id = $_SESSION['user_id'];
+    $name = trim($_POST['checkoutName']);
+    $email = trim($_POST['checkoutEmail']);
+    $address = trim($_POST['checkoutAddress']);
+    $cart = isset($_POST['cart_data']) ? json_decode($_POST['cart_data'], true) : [];
+    $total = 0;
+    $error_message = '';
+
+    // Validate fields
+    if (!$name || !$email || !$address) {
+        $error_message = "Please fill in all checkout fields.";
+    } elseif (empty($cart)) {
+        $error_message = "Your cart is empty.";
+    }
+
+    if (!$error_message) {
+        foreach ($cart as $item) {
+            $total += floatval($item['price']) * intval($item['qty']);
+        }
+
+        // Insert order
+        $stmt = $conn->prepare("INSERT INTO orders (user_id, name, email, address, total_amount, status) VALUES (?, ?, ?, ?, ?, 'pending')");
+        if ($stmt) {
+            $stmt->bind_param("isssd", $user_id, $name, $email, $address, $total);
+            if ($stmt->execute()) {
+                $order_id = $conn->insert_id;
+
+                // Insert order items
+                $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, product_name, price, quantity) VALUES (?, ?, ?, ?)");
+                if ($stmt_item) {
+                    foreach ($cart as $item) {
+                        $product_name = $item['name'];
+                        $price = floatval($item['price']);
+                        $qty = intval($item['qty']);
+                        $stmt_item->bind_param("isdi", $order_id, $product_name, $price, $qty);
+                        if (!$stmt_item->execute()) {
+                            $error_message = "Failed to insert order item: " . $stmt_item->error;
+                            break;
+                        }
+                    }
+                    if (!$error_message) {
+                        $success_message = "Order placed successfully!";
+                    }
+                } else {
+                    $error_message = "Failed to prepare order items statement: " . $conn->error;
+                }
+            } else {
+                $error_message = "Failed to insert order: " . $stmt->error;
+            }
+        } else {
+            $error_message = "Failed to prepare order statement: " . $conn->error;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,6 +74,85 @@ include '../config/conn.php';
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="../assets/css/Style.css" />
+    <style>
+        /* ...existing code... */
+        .cart-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-modal.show {
+            display: flex !important;
+        }
+
+        .cart-modal-content {
+            background: #fff;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 100%;
+            margin: auto;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+            position: relative;
+        }
+
+        /* Best modern style for hidden form (can be applied to any visible one too) */
+        form#cartForm {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease-in-out;
+        }
+
+        form#cartForm input[type="text"],
+        form#cartForm input[type="email"],
+        form#cartForm input[type="hidden"],
+        form#cartForm textarea {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #fff;
+            transition: border-color 0.2s ease;
+        }
+
+        form#cartForm input:focus,
+        form#cartForm textarea:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+        }
+
+        form#cartForm button[type="submit"] {
+            background: #007bff;
+            color: #fff;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 500;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        form#cartForm button[type="submit"]:hover {
+            background: #0056b3;
+        }
+
+        /* ...existing code... */
+    </style>
 </head>
 
 <body>
@@ -54,7 +190,7 @@ include '../config/conn.php';
                     <i class="fas fa-shopping-bag"></i>
                     <span class="cart-count" id="cartCount">0</span>
                 </div>
-                <a href="../logout.php" class="nav-icon" title="Logout">
+                <a href="../auth/logout.php" class="nav-icon" title="Logout">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
             </div>
@@ -110,39 +246,6 @@ include '../config/conn.php';
                 <span class="dot"></span>
                 <span class="dot"></span>
                 <span class="dot"></span>
-            </div>
-        </div>
-    </section>
-
-    <!-- Categories Section -->
-    <section class="categories" id="">
-        <div class="container">
-            <h2 class="section-title">Shop by Category</h2>
-            <div class="categories-grid">
-                <div class="category-card">
-                    <i class="fas fa-running"></i>
-                    <h3>Athletic</h3>
-                    <p>Performance footwear for all sports</p>
-                    <p class="category-stats">200+ models available</p>
-                </div>
-                <div class="category-card">
-                    <i class="fas fa-street-view"></i>
-                    <h3>Casual</h3>
-                    <p>Everyday comfort with style</p>
-                    <p class="category-stats">150+ styles to choose from</p>
-                </div>
-                <div class="category-card">
-                    <i class="fas fa-hiking"></i>
-                    <h3>Outdoor</h3>
-                    <p>Adventure-ready footwear</p>
-                    <p class="category-stats">Weatherproof and durable</p>
-                </div>
-                <div class="category-card">
-                    <i class="fas fa-briefcase"></i>
-                    <h3>Formal</h3>
-                    <p>Elegant styles for special occasions</p>
-                    <p class="category-stats">Premium materials</p>
-                </div>
             </div>
         </div>
     </section>
@@ -295,84 +398,84 @@ include '../config/conn.php';
 
     <!-- Testimonials -->
     <section class="testimonials">
-        <div class="container">
-            <h2 class="section-title">What Our Customers Say</h2>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar">
-                            <img
-                                src="https://randomuser.me/api/portraits/women/43.jpg"
-                                alt="Sarah Johnson" />
-                        </div>
-                        <div>
-                            <h3>Sarah Johnson</h3>
-                            <div class="testimonial-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
+        <div class="container"></div>
+        <h2 class="section-title">What Our Customers Say</h2>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar">
+                        <img
+                            src="https://randomuser.me/api/portraits/women/43.jpg"
+                            alt="Sarah Johnson" />
                     </div>
-                    <div class="testimonial-content">
-                        "The UltraBoost Runners are the most comfortable shoes I've ever
-                        worn. Perfect for my daily runs and gym sessions. Will definitely
-                        buy again!"
+                    <div>
+                        <h3>Sarah Johnson</h3>
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
                     </div>
                 </div>
-
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar">
-                            <img
-                                src="https://randomuser.me/api/portraits/men/32.jpg"
-                                alt="Michael Chen" />
-                        </div>
-                        <div>
-                            <h3>Michael Chen</h3>
-                            <div class="testimonial-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-content">
-                        "The customization options are fantastic! I was able to create the
-                        perfect pair of Oxfords for my wedding. Great quality and
-                        service."
-                    </div>
-                </div>
-
-                <div class="testimonial-card">
-                    <div class="testimonial-header">
-                        <div class="testimonial-avatar">
-                            <img
-                                src="https://randomuser.me/api/portraits/women/68.jpg"
-                                alt="Emily Rodriguez" />
-                        </div>
-                        <div>
-                            <h3>Emily Rodriguez</h3>
-                            <div class="testimonial-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-content">
-                        "I bought the TrailMaster boots for my hiking trip to the Rockies.
-                        They performed exceptionally well in all conditions. Highly
-                        recommended!"
-                    </div>
+                <div class="testimonial-content">
+                    "The UltraBoost Runners are the most comfortable shoes I've ever
+                    worn. Perfect for my daily runs and gym sessions. Will definitely
+                    buy again!"
                 </div>
             </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar">
+                        <img
+                            src="https://randomuser.me/api/portraits/men/32.jpg"
+                            alt="Michael Chen" />
+                    </div>
+                    <div>
+                        <h3>Michael Chen</h3>
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-content">
+                    "The customization options are fantastic! I was able to create the
+                    perfect pair of Oxfords for my wedding. Great quality and
+                    service."
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar">
+                        <img
+                            src="https://randomuser.me/api/portraits/women/68.jpg"
+                            alt="Emily Rodriguez" />
+                    </div>
+                    <div>
+                        <h3>Emily Rodriguez</h3>
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-content">
+                    "I bought the TrailMaster boots for my hiking trip to the Rockies.
+                    They performed exceptionally well in all conditions. Highly
+                    recommended!"
+                </div>
+            </div>
+        </div>
         </div>
     </section>
 
@@ -489,32 +592,49 @@ include '../config/conn.php';
         <div class="cart-modal-content">
             <span class="cart-modal-close" id="cartModalClose">&times;</span>
             <h2>Your Cart</h2>
-            <div id="cartItems"></div>
+            <?php if (!empty($success_message)): ?>
+                <div style="color:green; margin-bottom:10px;"><?= htmlspecialchars($success_message) ?></div>
+            <?php endif; ?>
+            <?php if (!empty($error_message)): ?>
+                <div style="color:red; margin-bottom:10px;"><?= htmlspecialchars($error_message) ?></div>
+            <?php endif; ?>
+            <!-- Cart Info Summary -->
+            <div id="cartInfoSummary" style="margin-bottom: 16px; font-size: 16px; color: #333;">
+                <!-- JS will fill this with cart details -->
+            </div>
+            <!-- Order Items Table -->
+            <div id="cartItemsTableWrapper">
+                <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+                    <tbody id="cartItems">
+                        <!-- JS will fill this -->
+                    </tbody>
+                </table>
+            </div>
             <div id="cartSummary" style="margin-bottom: 20px"></div>
-            <form id="cartForm">
+            <!-- Order Details Preview (hidden, but needed for JS) -->
+            <div style="display:none;">
+                <span id="orderDetailName"></span>
+                <span id="orderDetailEmail"></span>
+                <span id="orderDetailAddress"></span>
+                <span id="orderDetailTotalItems"></span>
+                <span id="orderDetailTotalPrice"></span>
+            </div>
+            <form id="cartForm" method="POST" autocomplete="off">
                 <div class="form-group">
-                    <input
-                        type="text"
-                        id="checkoutName"
-                        placeholder="Full Name"
-                        required
-                        style="margin-bottom: 10px; width: 100%; padding: 10px" />
+                    <input type="text" name="checkoutNameVisible" id="checkoutNameVisible" placeholder="Full Name" required />
                 </div>
                 <div class="form-group">
-                    <input
-                        type="email"
-                        id="checkoutEmail"
-                        placeholder="Email Address"
-                        required
-                        style="margin-bottom: 10px; width: 100%; padding: 10px" />
+                    <input type="email" name="checkoutEmailVisible" id="checkoutEmailVisible" placeholder="Email Address" required />
                 </div>
                 <div class="form-group">
-                    <textarea
-                        id="checkoutAddress"
-                        placeholder="Shipping Address"
-                        required
-                        style="margin-bottom: 10px; width: 100%; padding: 10px"></textarea>
+                    <textarea name="checkoutAddressVisible" id="checkoutAddressVisible" placeholder="Shipping Address" required></textarea>
                 </div>
+                <!-- Hidden fields for PHP submission (no required attribute) -->
+                <input type="hidden" name="checkoutName" id="checkoutName" />
+                <input type="hidden" name="checkoutEmail" id="checkoutEmail" />
+                <input type="hidden" name="checkoutAddress" id="checkoutAddress" />
+                <input type="hidden" name="cart_data" id="cartDataInput" />
+                <input type="hidden" name="checkout_submit" value="1" />
                 <button type="submit" class="btn btn-secondary" style="width: 100%">
                     Checkout
                 </button>
