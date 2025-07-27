@@ -52,6 +52,25 @@ while ($row = $topRevenueProducts->fetch_assoc()) {
     $topRevenueProductNames[] = $row['product_name'];
     $topRevenueProductAmounts[] = (float)$row['total_revenue'];
 }
+
+// Fetch all products
+$allProducts = $conn->query("
+    SELECT p.*, c.name as category_name 
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.id
+    ORDER BY p.created_at DESC
+");
+
+// Fetch all orders
+$allOrders = $conn->query("SELECT * FROM orders ORDER BY created_at DESC");
+
+// Fetch all order items (with order and product info)
+$allOrderItems = $conn->query("
+    SELECT oi.*, o.name as customer_name, o.email as customer_email, o.created_at as order_date
+    FROM order_items oi
+    LEFT JOIN orders o ON oi.order_id = o.id
+    ORDER BY oi.order_id DESC
+");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -73,8 +92,7 @@ while ($row = $topRevenueProducts->fetch_assoc()) {
             <header>
                 <h1>Dashboard</h1>
                 <div class="admin-info">
-                    <span>Welcome, Admin</span>
-                    <img src="" alt="Admin" class="admin-avatar">
+                    <img src="https://i.pinimg.com/736x/5f/40/6a/5f406ab25e8942cbe0da6485afd26b71.jpg" alt="Admin" class="admin-avatar">
                 </div>
             </header>
 
@@ -200,6 +218,76 @@ while ($row = $topRevenueProducts->fetch_assoc()) {
                                     <td><span class="status-badge <?= $status_class ?>"><?= ucfirst($product['status']) ?></span></td>
                                     <td><?= $product['stock'] ?></td>
                                     <td><?= date('M d, Y', strtotime($product['created_at'])) ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- All Orders Table -->
+            <div class="recent-section" style="margin-top:40px;">
+                <h2>All Orders</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>User ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($order = $allOrders->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?= $order['id'] ?></td>
+                                    <td><?= $order['user_id'] ?></td>
+                                    <td><?= htmlspecialchars($order['name']) ?></td>
+                                    <td><?= htmlspecialchars($order['email']) ?></td>
+                                    <td><?= htmlspecialchars($order['address']) ?></td>
+                                    <td>$<?= number_format($order['total_amount'], 2) ?></td>
+                                    <td><?= htmlspecialchars($order['status']) ?></td>
+                                    <td><?= $order['created_at'] ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- All Order Items Table -->
+            <div class="recent-section" style="margin-top:40px;">
+                <h2>All Order Items</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order Item ID</th>
+                                <th>Order ID</th>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Customer</th>
+                                <th>Email</th>
+                                <th>Order Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($item = $allOrderItems->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?= $item['id'] ?></td>
+                                    <td><?= $item['order_id'] ?></td>
+                                    <td><?= htmlspecialchars($item['product_name']) ?></td>
+                                    <td>$<?= number_format($item['price'], 2) ?></td>
+                                    <td><?= $item['quantity'] ?></td>
+                                    <td><?= htmlspecialchars($item['customer_name']) ?></td>
+                                    <td><?= htmlspecialchars($item['customer_email']) ?></td>
+                                    <td><?= $item['order_date'] ?></td>
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
