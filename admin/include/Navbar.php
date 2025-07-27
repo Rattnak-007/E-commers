@@ -32,7 +32,7 @@
                 <a href="../Total_user/User.php" <?= basename($_SERVER['PHP_SELF']) == 'User.php' ? 'class="active"' : '' ?>>
                     <i class="fas fa-users"></i> Users
                 </a>
-                <a href="../auth/logout.php">
+                <a href="../../auth/logout.php">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </nav>
