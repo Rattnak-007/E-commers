@@ -18,6 +18,7 @@ body {
 /* Sidebar Styles */
 .sidebar {
   width: 250px;
+  height: 100vh;
   background: #2c3e50;
   color: white;
   padding: 20px 0;
@@ -197,13 +198,207 @@ th {
   background: #2980b9;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .admin-container {
-    flex-direction: column;
+/* Sidebar Toggle Button */
+.toggle-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  margin-left: auto;
+  display: none;
+}
+
+/* Mobile Header - Hidden by default */
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: white;
+  padding: 0 15px;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+}
+
+/* Desktop Styles (> 768px) */
+@media (min-width: 769px) {
+  .mobile-header {
+    display: none !important;
   }
 
   .sidebar {
+    position: fixed !important;
+    left: 0 !important;
+    width: 250px;
+  }
+
+  .main-content {
+    margin-left: 250px;
+  }
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 1200px) {
+  .main-content {
+    padding: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .stat-card {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    position: relative;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -250px;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: none;
+  }
+
+  .sidebar.active {
+    left: 0;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .main-content {
+    margin-left: 0;
     width: 100%;
+    padding: 70px 15px 15px;
+  }
+
+  .mobile-header {
+    display: flex;
+  }
+
+  .toggle-sidebar {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #2c3e50;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .mobile-logo {
+    margin-left: 15px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+  }
+}
+
+@media (max-width: 576px) {
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .table-responsive {
+    margin: 0 -15px;
+  }
+
+  th,
+  td {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .btn-add,
+  .btn-edit,
+  .btn-delete {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) {
+  .action-btn,
+  .btn {
+    min-height: 44px;
+  }
+
+  .table-responsive {
+    cursor: grab;
+  }
+
+  .table-responsive:active {
+    cursor: grabbing;
+  }
+}
+
+/* High DPI Screen Optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .product-image img,
+  .category-image img {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .table-responsive::-webkit-scrollbar-track {
+    background: #2d3748;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb {
+    background: #4a5568;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .table-responsive::-webkit-scrollbar-track {
+    background: #2d3748;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb {
+    background: #4a5568;
   }
 }
