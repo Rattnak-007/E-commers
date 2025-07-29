@@ -4,7 +4,7 @@ if (!isset($_SESSION["user_email"]) || $_SESSION["user_email"] !== "admin@ecomme
     header("Location: ../auth/login.php");
     exit();
 }
-include '../../config/conn.php';
+require_once '../../config/conn.php';
 
 // Handle Delete User
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {

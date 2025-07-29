@@ -235,3 +235,36 @@
     transform: translateY(0);
   }
 }
+
+/* Responsive grid for categories */
+@media (max-width: 1024px) {
+  .categories-dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .categories-dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .category-dashboard-card {
+    padding: 16px;
+  }
+  .modal-content {
+    padding: 18px;
+    margin: 40px 5px;
+    max-width: 98vw;
+  }
+}
+
+@media (max-width: 576px) {
+  .category-dashboard-card {
+    padding: 10px;
+  }
+  .modal-content {
+    padding: 10px;
+    margin: 20px 2px;
+  }
+}

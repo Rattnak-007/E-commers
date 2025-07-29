@@ -4,7 +4,7 @@ if (!isset($_SESSION["user_email"]) || $_SESSION["user_email"] !== "admin@ecomme
     header("Location: ../auth/login.php");
     exit();
 }
-include '../../config/conn.php';
+require_once '../../config/conn.php';
 
 // Fetch statistics
 $totalProducts = $conn->query("SELECT COUNT(*) as count FROM products")->fetch_assoc()['count'];
@@ -71,6 +71,38 @@ $allOrderItems = $conn->query("
     LEFT JOIN orders o ON oi.order_id = o.id
     ORDER BY oi.order_id DESC
 ");
+
+// Total revenue and orders for today
+// Use CURDATE() for MySQL date comparison to ensure correct results
+$todayRevenueRow = $conn->query("SELECT SUM(total_amount) as revenue FROM orders WHERE DATE(created_at) = CURDATE()")->fetch_assoc();
+$todayRevenue = $todayRevenueRow['revenue'] ? $todayRevenueRow['revenue'] : 0;
+$todayOrdersRow = $conn->query("SELECT COUNT(*) as count FROM orders WHERE DATE(created_at) = CURDATE()")->fetch_assoc();
+$todayOrders = $todayOrdersRow['count'];
+
+// Total revenue and orders for current month
+$thisMonth = date('Y-m');
+$monthRevenueRow = $conn->query("SELECT SUM(total_amount) as revenue FROM orders WHERE DATE_FORMAT(created_at, '%Y-%m') = '$thisMonth'")->fetch_assoc();
+$monthRevenue = $monthRevenueRow['revenue'] ? $monthRevenueRow['revenue'] : 0;
+$monthOrdersRow = $conn->query("SELECT COUNT(*) as count FROM orders WHERE DATE_FORMAT(created_at, '%Y-%m') = '$thisMonth'")->fetch_assoc();
+$monthOrders = $monthOrdersRow['count'];
+
+// Total revenue and orders for current year
+$thisYear = date('Y');
+$yearRevenueRow = $conn->query("SELECT SUM(total_amount) as revenue FROM orders WHERE YEAR(created_at) = '$thisYear'")->fetch_assoc();
+$yearRevenue = $yearRevenueRow['revenue'] ? $yearRevenueRow['revenue'] : 0;
+$yearOrdersRow = $conn->query("SELECT COUNT(*) as count FROM orders WHERE YEAR(created_at) = '$thisYear'")->fetch_assoc();
+$yearOrders = $yearOrdersRow['count'];
+
+// Handle selected date filter (from GET param)
+$selectedDate = isset($_GET['date']) ? $_GET['date'] : '';
+$selectedDateRevenue = 0;
+$selectedDateOrders = 0;
+if ($selectedDate && preg_match('/^\d{4}-\d{2}-\d{2}$/', $selectedDate)) {
+    $row = $conn->query("SELECT SUM(total_amount) as revenue FROM orders WHERE DATE(created_at) = '$selectedDate'")->fetch_assoc();
+    $selectedDateRevenue = $row['revenue'] ? $row['revenue'] : 0;
+    $row = $conn->query("SELECT COUNT(*) as count FROM orders WHERE DATE(created_at) = '$selectedDate'")->fetch_assoc();
+    $selectedDateOrders = $row['count'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -87,7 +119,6 @@ $allOrderItems = $conn->query("
 <body>
     <div class="admin-container">
         <?php require '../include/Navbar.php'; ?>
-        <!-- Main Content -->
         <div class="main-content">
             <header>
                 <h1>Dashboard</h1>
@@ -95,6 +126,74 @@ $allOrderItems = $conn->query("
                     <img src="https://i.pinimg.com/736x/5f/40/6a/5f406ab25e8942cbe0da6485afd26b71.jpg" alt="Admin" class="admin-avatar">
                 </div>
             </header>
+
+            <!-- Filter for Today/Monthly/Yearly/Date -->
+            <div style="margin-bottom: 18px; display: flex; align-items: center; gap: 16px;">
+                <label for="revenueFilter" style="font-weight:600;margin-right:10px;">Revenue Filter:</label>
+                <select id="revenueFilter" style="padding:6px 14px; border-radius:6px;">
+                    <option value="today">Today</option>
+                    <option value="month">Monthly</option>
+                    <option value="year">Yearly</option>
+                    <option value="date">Date</option>
+                </select>
+                <input type="date" id="revenueDateInput" value="<?= htmlspecialchars($selectedDate) ?>" style="padding:6px 14px; border-radius:6px; display:none;" />
+            </div>
+
+            <!-- Revenue Cards (all, toggle via JS) -->
+            <div id="todayRevenueCard" style="display:block;">
+                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+                    <div style="flex:1; min-width:220px; background:#fff; border-radius:10px; box-shadow:0 2px 8px #0001; padding:18px;">
+                        <h4 style="color:#374151; font-size:15px; margin-bottom:6px;">Today's Revenue</h4>
+                        <div style="font-size:22px; font-weight:700; color:#16a34a;">
+                            $<?= number_format($todayRevenue, 2) ?>
+                        </div>
+                        <div style="font-size:14px; color:#374151; margin-top:4px;">
+                            Orders: <?= $todayOrders ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="monthRevenueCard" style="display:none;">
+                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+                    <div style="flex:1; min-width:220px; background:#fff; border-radius:10px; box-shadow:0 2px 8px #0001; padding:18px;">
+                        <h4 style="color:#374151; font-size:15px; margin-bottom:6px;">This Month's Revenue</h4>
+                        <div style="font-size:22px; font-weight:700; color:#2563eb;">
+                            $<?= number_format($monthRevenue, 2) ?>
+                        </div>
+                        <div style="font-size:14px; color:#374151; margin-top:4px;">
+                            Orders: <?= $monthOrders ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="yearRevenueCard" style="display:none;">
+                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+                    <div style="flex:1; min-width:220px; background:#fff; border-radius:10px; box-shadow:0 2px 8px #0001; padding:18px;">
+                        <h4 style="color:#374151; font-size:15px; margin-bottom:6px;">This Year's Revenue</h4>
+                        <div style="font-size:22px; font-weight:700; color:#0ea5e9;">
+                            $<?= number_format($yearRevenue, 2) ?>
+                        </div>
+                        <div style="font-size:14px; color:#374151; margin-top:4px;">
+                            Orders: <?= $yearOrders ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="dateRevenueCard" style="display:none;">
+                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+                    <div style="flex:1; min-width:220px; background:#fff; border-radius:10px; box-shadow:0 2px 8px #0001; padding:18px;">
+                        <h4 style="color:#374151; font-size:15px; margin-bottom:6px;">
+                            Revenue for <?= $selectedDate ? date('M d, Y', strtotime($selectedDate)) : 'Selected Date' ?>
+                        </h4>
+                        <div style="font-size:22px; font-weight:700; color:#eab308;">
+                            $<?= number_format($selectedDateRevenue, 2) ?>
+                        </div>
+                        <div style="font-size:14px; color:#374151; margin-top:4px;">
+                            Orders: <?= $selectedDateOrders ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Statistics Cards -->
             <div class="stats-grid">
@@ -134,22 +233,6 @@ $allOrderItems = $conn->query("
                     <div class="stat-details">
                         <h3>Collections</h3>
                         <p><?= $collections ?></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Extra Order/Order Items Info Cards -->
-            <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
-                <div style="flex:1; min-width:220px; background:#fff; border-radius:10px; box-shadow:0 2px 8px #0001; padding:18px;">
-                    <h4 style="color:#374151; font-size:15px; margin-bottom:6px;">Total Revenue</h4>
-                    <div style="font-size:22px; font-weight:700; color:#16a34a;">
-                        $<?= number_format($totalRevenue, 2) ?>
-                    </div>
-                </div>
-                <div style="flex:1; min-width:220px; background:#fff; border-radius:10px; box-shadow:0 2px 8px #0001; padding:18px;">
-                    <h4 style="color:#374151; font-size:15px; margin-bottom:6px;">Unique Customers</h4>
-                    <div style="font-size:22px; font-weight:700; color:#2563eb;">
-                        <?= $totalCustomers ?>
                     </div>
                 </div>
             </div>
@@ -406,6 +489,44 @@ $allOrderItems = $conn->query("
                         beginAtZero: true
                     }
                 }
+            }
+        });
+
+        // Revenue filter toggle
+        const filter = document.getElementById('revenueFilter');
+        const dateInput = document.getElementById('revenueDateInput');
+        filter.addEventListener('change', function() {
+            document.getElementById('todayRevenueCard').style.display = 'none';
+            document.getElementById('monthRevenueCard').style.display = 'none';
+            document.getElementById('yearRevenueCard').style.display = 'none';
+            document.getElementById('dateRevenueCard').style.display = 'none';
+            dateInput.style.display = (this.value === 'date') ? 'inline-block' : 'none';
+            if (this.value === 'today') {
+                document.getElementById('todayRevenueCard').style.display = 'block';
+            } else if (this.value === 'month') {
+                document.getElementById('monthRevenueCard').style.display = 'block';
+            } else if (this.value === 'year') {
+                document.getElementById('yearRevenueCard').style.display = 'block';
+            } else if (this.value === 'date') {
+                document.getElementById('dateRevenueCard').style.display = 'block';
+            }
+        });
+
+        // On date change, reload page with ?date=YYYY-MM-DD&revenueFilter=date
+        dateInput.addEventListener('change', function() {
+            if (this.value) {
+                window.location.href = '?revenueFilter=date&date=' + this.value;
+            }
+        });
+
+        // Show correct card on page load if filter=date
+        document.addEventListener('DOMContentLoaded', function() {
+            if (filter.value === 'date') {
+                dateInput.style.display = 'inline-block';
+                document.getElementById('dateRevenueCard').style.display = 'block';
+                document.getElementById('todayRevenueCard').style.display = 'none';
+                document.getElementById('monthRevenueCard').style.display = 'none';
+                document.getElementById('yearRevenueCard').style.display = 'none';
             }
         });
     </script>

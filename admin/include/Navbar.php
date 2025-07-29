@@ -43,7 +43,7 @@
             <a href="../orders/manage_order.php" <?= basename($_SERVER['PHP_SELF']) == 'manage_order.php' ? 'class="active"' : '' ?>>
                 <i class="fas fa-shopping-cart"></i> Orders
             </a>
-            <a href="../Total_user/User.php" <?= basename($_SERVER['PHP_SELF']) == 'User.php' ? 'class="active"' : '' ?>>
+            <a href="../Total_user/Mangement_user.php" <?= basename($_SERVER['PHP_SELF']) == 'User.php' ? 'class="active"' : '' ?>>
                 <i class="fas fa-users"></i> Users
             </a>
             <a href="../../auth/logout.php">
