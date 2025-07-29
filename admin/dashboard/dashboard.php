@@ -296,7 +296,7 @@ $allOrderItems = $conn->query("
             </div>
         </div>
     </div>
-    <script src="assets/js/admin.js"></script>
+    <script src="../assets/js/admin.js"></script>
     <script>
         // Chart Data from PHP
         const totalProducts = <?= (int)$totalProducts ?>;

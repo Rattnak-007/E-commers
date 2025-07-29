@@ -1,83 +1,158 @@
-document.addEventListener("DOMContentLoaded", function () {
-  // Slideshow functionality
-  const slides = document.querySelectorAll(".slide");
-  const dots = document.querySelectorAll(".dot");
-  const prevBtn = document.getElementById("slidePrev");
-  const nextBtn = document.getElementById("slideNext");
-  let currentSlide = 0;
-  let slideInterval;
+// Toggle mobile menu
+document.getElementById("mobileMenu").addEventListener("click", function () {
+  document.getElementById("navMenu").classList.toggle("show");
+});
 
-  // Initialize slideshow
-  function initSlideshow() {
-    // Set initial active slide
-    showSlide(currentSlide);
+// Slideshow functionality
+let slideIndex = 0;
+const slides = document.querySelectorAll(".slide");
+const dots = document.querySelectorAll(".dot");
 
-    // Start auto rotation
-    startAutoRotation();
+function showSlide(n) {
+  if (n >= slides.length) slideIndex = 0;
+  if (n < 0) slideIndex = slides.length - 1;
 
-    // Event listeners
-    prevBtn.addEventListener("click", () => {
-      pauseAutoRotation();
-      prevSlide();
-      startAutoRotation();
-    });
+  slides.forEach((slide) => slide.classList.remove("active"));
+  dots.forEach((dot) => dot.classList.remove("active"));
 
-    nextBtn.addEventListener("click", () => {
-      pauseAutoRotation();
-      nextSlide();
-      startAutoRotation();
-    });
+  slides[slideIndex].classList.add("active");
+  dots[slideIndex].classList.add("active");
+}
 
-    // Add click events for dots
-    dots.forEach((dot, index) => {
-      dot.addEventListener("click", () => {
-        pauseAutoRotation();
-        showSlide(index);
-        startAutoRotation();
+document.getElementById("slideNext").addEventListener("click", () => {
+  slideIndex++;
+  showSlide(slideIndex);
+});
+
+document.getElementById("slidePrev").addEventListener("click", () => {
+  slideIndex--;
+  showSlide(slideIndex);
+});
+
+// Auto advance slides
+setInterval(() => {
+  slideIndex++;
+  showSlide(slideIndex);
+}, 5000);
+
+// Cart functionality
+let cart = [];
+const cartIcon = document.getElementById("cartIcon");
+const cartModal = document.getElementById("cartModal");
+const cartModalClose = document.getElementById("cartModalClose");
+const cartCount = document.getElementById("cartCount");
+const cartItems = document.getElementById("cartItems");
+const cartSummary = document.getElementById("cartSummary");
+const cartInfoSummary = document.getElementById("cartInfoSummary");
+const toast = document.getElementById("toast");
+
+// Add to cart buttons
+document.querySelectorAll(".add-to-cart").forEach((button) => {
+  button.addEventListener("click", function () {
+    const id = this.getAttribute("data-id");
+    const name = this.getAttribute("data-name");
+    const price = parseFloat(this.getAttribute("data-price"));
+
+    // Check if item already in cart
+    const existingItem = cart.find((item) => item.id === id);
+
+    if (existingItem) {
+      existingItem.qty++;
+    } else {
+      cart.push({
+        id,
+        name,
+        price,
+        qty: 1,
       });
+    }
+
+    updateCart();
+    showToast(`${name} added to cart!`);
+  });
+});
+
+// Show cart modal
+cartIcon.addEventListener("click", () => {
+  cartModal.classList.add("show");
+  updateCart();
+});
+
+// Close cart modal
+cartModalClose.addEventListener("click", () => {
+  cartModal.classList.remove("show");
+});
+
+// Show toast message
+function showToast(message) {
+  document.getElementById("toastMessage").textContent = message;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3000);
+}
+
+// Update cart display
+function updateCart() {
+  cartCount.textContent = cart.reduce((total, item) => total + item.qty, 0);
+
+  // Update cart items table
+  cartItems.innerHTML = "";
+  let totalItems = 0;
+  let totalPrice = 0;
+
+  cart.forEach((item) => {
+    const itemTotal = item.price * item.qty;
+    totalItems += item.qty;
+    totalPrice += itemTotal;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>$${item.price.toFixed(2)}</td>
+      <td>${item.qty}</td>
+      <td>$${itemTotal.toFixed(2)}</td>
+      <td>
+        <button class="cart-cancel-btn" data-id="${
+          item.id
+        }" style="background:#ef4444;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;">
+          Cancel
+        </button>
+      </td>
+    `;
+    cartItems.appendChild(row);
+  });
+
+  cartSummary.textContent = `Total: $${totalPrice.toFixed(2)}`;
+  cartInfoSummary.textContent = `You have ${totalItems} ${
+    totalItems === 1 ? "item" : "items"
+  } in your cart`;
+
+  // Update cart data for form submission
+  document.getElementById("cartDataInput").value = JSON.stringify(cart);
+
+  // Add cancel event listeners
+  document.querySelectorAll(".cart-cancel-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const id = this.getAttribute("data-id");
+      cart = cart.filter((item) => item.id !== id);
+      updateCart();
+      showToast("Item removed from cart!");
     });
-  }
+  });
+}
 
-  // Show specific slide
-  function showSlide(index) {
-    // Reset all slides and dots
-    slides.forEach((slide) => slide.classList.remove("active"));
-    dots.forEach((dot) => dot.classList.remove("active"));
-
-    // Set new active slide and dot
-    slides[index].classList.add("active");
-    dots[index].classList.add("active");
-
-    // Reset and restart progress bar animation
-    const progressBars = document.querySelectorAll(".progress-bar");
-    progressBars.forEach((bar) => (bar.style.width = "0%"));
-
-    // Update current slide index
-    currentSlide = index;
-  }
-
-  // Next slide
-  function nextSlide() {
-    currentSlide = (currentSlide + 1) % slides.length;
-    showSlide(currentSlide);
-  }
-
-  // Previous slide
-  function prevSlide() {
-    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-    showSlide(currentSlide);
-  }
-
-  // Start auto rotation
-  function startAutoRotation() {
-    slideInterval = setInterval(nextSlide, 5000);
-  }
-
-  // Pause auto rotation
-  function pauseAutoRotation() {
-    clearInterval(slideInterval);
-  }
-
-  // Initialize the slideshow
-  initSlideshow();
+// Form handling
+document.getElementById("cartForm").addEventListener("submit", function (e) {
+  // Update hidden fields with visible values
+  document.getElementById("checkoutName").value = document.getElementById(
+    "checkoutNameVisible"
+  ).value;
+  document.getElementById("checkoutEmail").value = document.getElementById(
+    "checkoutEmailVisible"
+  ).value;
+  document.getElementById("checkoutAddress").value = document.getElementById(
+    "checkoutAddressVisible"
+  ).value;
 });

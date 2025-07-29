@@ -9,7 +9,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $address = $_POST["address"];
     $sql = "INSERT INTO users (name, email, password, address) VALUES ('$name', '$email', '$password', '$address')";
     if ($conn->query($sql) === TRUE) {
-        // Auto-login after registration
         $user_id = $conn->insert_id;
         $_SESSION["user_id"] = $user_id;
         $_SESSION["user_name"] = $name;
@@ -38,7 +37,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     body {
-        background: linear-gradient(to right, #4facfe, #00f2fe);
         display: flex;
         justify-content: center;
         align-items: center;
