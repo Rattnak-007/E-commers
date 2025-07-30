@@ -20,7 +20,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 
 // Fetch all users except admin
 $users = $conn->query("
-    SELECT id, email, created_at, 
+    SELECT id, email, name, created_at, 
            (SELECT COUNT(*) FROM orders WHERE user_id = users.id) as total_orders
     FROM users 
     WHERE email != 'admin@ecommerce.com'
@@ -60,6 +60,7 @@ $users = $conn->query("
                 <thead>
                     <tr>
                         <th>Email</th>
+                        <th>Name</th>
                         <th>Registration Date</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -69,6 +70,7 @@ $users = $conn->query("
                     <?php while ($user = $users->fetch_assoc()): ?>
                         <tr>
                             <td class="user-email"><?php echo htmlspecialchars($user['email']); ?></td>
+                            <td class="user-name"><?php echo htmlspecialchars($user['name']); ?></td>
                             <td class="user-date"><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
                             <td><span class="user-status status-active">Active</span></td>
                             <td>

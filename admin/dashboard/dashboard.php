@@ -20,9 +20,6 @@ $totalOrderItems = $conn->query("SELECT COUNT(*) as count FROM order_items")->fe
 $totalRevenueRow = $conn->query("SELECT SUM(total_amount) as revenue FROM orders")->fetch_assoc();
 $totalRevenue = $totalRevenueRow['revenue'] ? $totalRevenueRow['revenue'] : 0;
 
-// Unique customers
-$totalCustomers = $conn->query("SELECT COUNT(DISTINCT user_id) as count FROM orders")->fetch_assoc()['count'];
-
 // Top 5 selling products (by quantity)
 $topProducts = $conn->query("
     SELECT product_name, SUM(quantity) as total_qty

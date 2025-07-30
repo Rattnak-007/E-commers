@@ -88,14 +88,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_submit'])) {
     <title>StepStyle | Premium Footwear</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="../assets/css/Style.css">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Loader Overlay Styles */
+        #pageLoader {
+            position: fixed;
+            z-index: 99999;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.4s;
+        }
+
+        #pageLoader.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #4a6de5;
+            border-top: 6px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spinLoader 1s linear infinite;
+        }
+
+        @keyframes spinLoader {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Loader for checkout */
+        #checkoutLoader {
+            position: fixed;
+            z-index: 99999;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #checkoutLoader.show {
+            display: flex;
+        }
+
+        .checkout-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #10b981;
+            border-top: 6px solid #3b82f6;
+            border-radius: 50%;
+            animation: spinLoader 1s linear infinite;
+        }
+    </style>
 </head>
-<style>
-    html {
-        scroll-behavior: smooth;
-    }
-</style>
 
 <body>
+    <!-- Loader Overlay -->
+    <div id="pageLoader">
+        <div class="loader-spinner"></div>
+    </div>
+    <!-- Loader for checkout -->
+    <div id="checkoutLoader">
+        <div class="checkout-spinner"></div>
+    </div>
     <!-- Header -->
     <header>
         <div class="container header-container">
@@ -612,6 +686,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout_submit'])) {
             });
         </script>
     <?php endif; ?>
+    <script>
+        // Hide loader after short delay on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                document.getElementById("pageLoader").classList.add("hide");
+            }, 1200);
+        });
+
+        // Show loader on checkout submit
+        document.getElementById("cartForm").addEventListener("submit", function() {
+            document.getElementById("checkoutLoader").classList.add("show");
+        });
+    </script>
 </body>
 
 </html>
